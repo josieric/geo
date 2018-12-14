@@ -1,0 +1,159 @@
+<html>
+<head>
+  <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+  <script language="javascript">
+  var http="http://";
+  if (window.location.protocol == "https:") {
+    http="https://";
+  }
+
+  var size = new OpenLayers.Size(21,35);
+  var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+  var colors = {1: 'red', 2: 'purple', 3: 'yellow', 4: 'blue', 5: 'green'};
+  var epsg4326 =  new OpenLayers.Projection("EPSG:4326");      //WGS 1984 projection
+  var toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
+  var map;
+  //////////// Control clic
+  OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+                defaultHandlerOptions: {
+                    'single': true,
+                    'double': false,
+                    'pixelTolerance': 0,
+                    'stopSingle': false,
+                    'stopDouble': false
+                },
+
+                initialize: function(options) {
+                    this.handlerOptions = OpenLayers.Util.extend(
+                        {}, this.defaultHandlerOptions
+                    );
+                    OpenLayers.Control.prototype.initialize.apply(
+                        this, arguments
+                    ); 
+                    this.handler = new OpenLayers.Handler.Click(
+                        this, {
+                            'click': this.trigger
+                        }, this.handlerOptions
+                    );
+                }, 
+
+                trigger: function(e) {
+                    var lonlat = map.getLonLatFromPixel(e.xy);
+                    lonlat = new OpenLayers.LonLat(lonlat.lon,lonlat.lat).transform(toProjection,epsg4326);
+                    if( confirm("Mark " + lonlat.lat + " N, " + lonlat.lon + " E")) {
+                      document.getElementById('lon').value = lonlat.lon;
+                      document.getElementById('lat').value = lonlat.lat;
+		      recenter(lonlat.lon,lonlat.lat);
+                      addmarker(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)
+                    }
+                }
+
+  });
+  //////////////
+
+  function get_map(lon , lat , zoom) {
+    //document.getElementById("mapdiv").innerHTML = "";
+    map = new OpenLayers.Map("mapdiv");
+
+    // Add click event
+    var click = new OpenLayers.Control.Click();
+    map.addControl(click);
+    click.activate();
+
+    // create layer principal
+    map.addLayer(new OpenLayers.Layer.OSM());
+
+    // create layer switcher widget in top right corner of map.
+    var layer_switcher= new OpenLayers.Control.LayerSwitcher({});
+    map.addControl(layer_switcher);
+
+    var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
+    map.setCenter (lonLat, zoom);
+
+    // Exemple plusieurs markers
+    //var i = 0;
+    //for (var c in colors) {
+    //  addmarker( Number(lon) + i , Number(lat) + i, colors[c]);
+    //  i += 0.1;
+    //}
+  }
+  function recenter(lon,lat,zoom) {
+    var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
+    map.setCenter (lonLat, zoom);
+  }
+  function addmarker(lon,lat,color) {
+    var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
+    var icon = new OpenLayers.Icon('mark_'+color+'.png',size,offset);
+    var markers = new OpenLayers.Layer.Markers( "Markers" );
+    map.addLayer(markers);
+    popup = new OpenLayers.Popup("toto",lonLat,
+                       new OpenLayers.Size(240,40),
+                       ("Lon: "+ lon +"<br>lat: "+ lat), true);
+    markers.addMarker(new OpenLayers.Marker(lonLat,icon));
+    map.addPopup(popup);
+  }
+
+  function GetCommune(cp) {
+    var xmlhttp = new XMLHttpRequest();
+    var url = http+"apicarto.ign.fr/api/codes-postaux/communes/"+cp;
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+          var myArr = JSON.parse(xmlhttp.responseText);
+          for (var m in myArr) {
+            document.getElementById("lab_commune").innerHTML += myArr[m].nomCommune + " <a href=\"javascript:GetCommuneINSEE('"+myArr[m].codeCommune+"');\">"+myArr[m].codeCommune+"</a>&nbsp;";
+          }
+      }
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+  }
+
+  function GetCommuneINSEE(insee) {
+    var xmlhttp = new XMLHttpRequest();
+    var url = http+"apicarto.ign.fr/api/gpu/municipality/?insee="+insee;
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+          var myArr = JSON.parse(xmlhttp.responseText);
+          document.getElementById('lon').value = (myArr.features[0].properties.bbox[0] + myArr.features[0].properties.bbox[2])/2;
+          document.getElementById('lat').value = (myArr.features[0].properties.bbox[1] + myArr.features[0].properties.bbox[3])/2;
+          recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value);
+      }
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+  }
+  function resetCommune() {
+    document.getElementById("lab_commune").innerHTML = "";
+  }
+  </script>
+</head>
+<body>
+<div id="all" align="center">
+<form>
+  CP:&nbsp;<input id="codepostal" name="codepostal" value="91620">
+  <a href="javascript:GetCommune(document.getElementById('codepostal').value)">inseeFROMcp</a>&nbsp;<a href="javascript:resetCommune()">reset</a>
+  <br>
+  <div id="lab_commune"></div>
+  <a href="javascript:addmarker(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
+  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center</a>
+  <br>  
+  Lon:&nbsp;<input id="lon" name="lon" value="2.26317">
+  Lat:&nbsp;<input id="lat" name="lat" value="48.66348">
+  Zoom:&nbsp;<input id="zoom" name="zoom" value="9">
+  Color:&nbsp;
+<script>
+  document.open();
+  document.write('<select id="color" name="color">');
+  for (var c in colors) {
+     document.write('<option value="'+colors[c]+'">'+colors[c]+'</option>');
+  }
+  document.write('</select>');
+  document.write('<div id="mapdiv" style="width:85%"></div>');
+  document.close();
+  get_map(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)
+</script>
+</form>
+</div>
+</body>
+</html>
+
