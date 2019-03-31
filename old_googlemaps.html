@@ -1,0 +1,207 @@
+<html>
+<head>
+<!-- script type="text/javascript" src="reqHTTP2.js"-->
+<script language="javascript">
+var http="http://";
+if (window.location.protocol == "https:") {
+  http="https://";
+}
+
+function GetAddress(coord,id_elem) {
+  var xmlhttp = new XMLHttpRequest();
+  var micoord=coord;
+  if (micoord == "DEC") {
+    micoord=document.getElementById("latitude"+id_elem).value+","+document.getElementById("longitude"+id_elem).value;
+     document.getElementById("DMSlat"+id_elem).value = Decimal2DMS(document.getElementById("latitude"+id_elem).value);
+     document.getElementById("DMSlng"+id_elem).value = Decimal2DMS(document.getElementById("longitude"+id_elem).value);
+  }
+  else if (micoord == "DMS") {
+     micoord = DMS2Decimal(document.getElementById("DMSlat"+id_elem).value) +","+ DMS2Decimal(document.getElementById("DMSlng"+id_elem).value);
+     document.getElementById("latitude"+id_elem).value = DMS2Decimal(document.getElementById("DMSlat"+id_elem).value);
+     document.getElementById("longitude"+id_elem).value = DMS2Decimal(document.getElementById("DMSlng"+id_elem).value);
+  }
+  var url = http+"maps.googleapis.com/maps/api/geocode/json?latlng="+micoord;
+  xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        var myArr = JSON.parse(xmlhttp.responseText);
+        DisplayAddress(myArr,id_elem);
+    }
+  };
+
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+}
+
+function DisplayAddress(arr,id_elem) {
+    document.getElementById("ZoneStatus").innerHTML = "Status Req = "+arr.status+"<br>";
+    if (arr.results.length > 0) {
+      document.getElementById("FullAddress"+id_elem).value = arr.results[0].formatted_address;
+      document.getElementById("latitude"+id_elem).value = arr.results[0].geometry.location.lat;
+      document.getElementById("longitude"+id_elem).value = arr.results[0].geometry.location.lng;
+      document.getElementById("DMSlat"+id_elem).value = Decimal2DMS( arr.results[0].geometry.location.lat , "lat");
+      document.getElementById("DMSlng"+id_elem).value = Decimal2DMS( arr.results[0].geometry.location.lng , "lng" );
+    }
+    else {
+      document.getElementById("FullAddress"+id_elem).value = "";
+    }
+    ModifyImg();
+}
+
+function GetCoordAddress(address,minum) {
+  var xmlhttp = new XMLHttpRequest();
+  var url = http+"maps.googleapis.com/maps/api/geocode/json?address="+address;
+  xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        var myArr = JSON.parse(xmlhttp.responseText);
+        DisplayCoordAddress(myArr,minum);
+    }
+  };
+
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+}
+
+function DisplayCoordAddress(arr,minum) {
+    document.getElementById("ZoneStatus").innerHTML = "Status Req = "+arr.status+"<br>";
+    if (arr.results.length > 1) {
+      document.getElementById("ZoneAddMulti"+minum).innerHTML = "L'adresse n'est pas unique. "+arr.results.length+" trouv&eacute;es:<br>";
+      var i;
+      var out = "";
+      for(i = 0; i < arr.results.length; i++) {
+        out +=  "<a href=\"javascript:GetCoordAddress('"+arr.results[i].formatted_address+"','"+minum+"');\">"+arr.results[i].formatted_address + "</a><br>";
+      }
+      document.getElementById("ZoneAddMulti"+minum).innerHTML += out;
+    }
+    else if (arr.results.length == 0) {
+      document.getElementById("ZoneAddMulti"+minum).innerHTML = "Aucune adresse trouv&eacute;e.<br>";
+    }
+    else {
+      document.getElementById("ZoneAddMulti"+minum).innerHTML = "";
+      document.getElementById("FullAddress"+minum).value = arr.results[0].formatted_address;
+      document.getElementById("latitude"+minum).value = arr.results[0].geometry.location.lat;
+      document.getElementById("longitude"+minum).value = arr.results[0].geometry.location.lng;
+      document.getElementById("DMSlat"+minum).value = Decimal2DMS(document.getElementById("latitude"+minum).value);
+      document.getElementById("DMSlng"+minum).value = Decimal2DMS(document.getElementById("longitude"+minum).value);
+
+      ModifyImg();
+   }
+}
+
+function ModifyImg() {
+  var url = http+"maps.googleapis.com/maps/api/staticmap?center="+document.getElementById("latitude1").value+","+document.getElementById("longitude1").value
+            +"&zoom="+document.getElementById("zoom").value
+            +"&size="+document.getElementById("imgsize").value
+            +"&markers=color:red%7Clabel:1%7C"+document.getElementById("latitude1").value+","+document.getElementById("longitude1").value
+            +"&markers=color:green%7Clabel:2%7C"+document.getElementById("latitude2").value+","+document.getElementById("longitude2").value;
+  document.getElementById("IMG1").src = url;
+  url = http+"www.google.fr/maps/place/" + document.getElementById("DMSlat1").value+" "+document.getElementById("DMSlng1").value
+       + "/@"+document.getElementById("latitude1").value+","+document.getElementById("longitude1").value+","+document.getElementById("zoom").value+"z";
+  document.getElementById("Map1").href = url;
+  url = http+"maps.googleapis.com/maps/api/staticmap?center="+document.getElementById("latitude2").value+","+document.getElementById("longitude2").value
+            +"&zoom="+document.getElementById("zoom").value
+            +"&size="+document.getElementById("imgsize").value
+            +"&markers=color:green%7Clabel:2%7C"+document.getElementById("latitude2").value+","+document.getElementById("longitude2").value
+            +"&markers=color:red%7Clabel:1%7C"+document.getElementById("latitude1").value+","+document.getElementById("longitude1").value;
+  document.getElementById("IMG2").src = url;
+  url = http+"www.google.fr/maps/place/" + document.getElementById("DMSlat2").value+" "+document.getElementById("DMSlng2").value
+       + "/@"+document.getElementById("latitude2").value+","+document.getElementById("longitude2").value+","+document.getElementById("zoom").value+"z";
+  document.getElementById("Map2").href = url;
+
+  var mid= "Distance:&nbsp:"+distance(document.getElementById("latitude1").value,document.getElementById("longitude1").value,document.getElementById("latitude2").value,document.getElementById("longitude2").value) + "Km.";
+  document.getElementById("distance").innerHTML = mid;
+}
+
+
+function Decimal2DMS(number,type) {
+  var resul = "";
+  var degree;
+  var minute;
+  var seconde;
+  var direction;
+  if (type == "lat") {
+    direction = ["N","S"];
+  }
+  else {
+    direction = ["E","W"];
+  }
+  if (number > 0) {
+    resul = direction[0];
+  }
+  else {
+    resul = direction[1];
+    number = number * -1;
+  }
+  var pentiere = Math.trunc(number);
+  var pdecimale = number - Math.trunc(number);
+  degree = Math.trunc(number);
+  minute = Math.trunc((number - degree) * 60);
+  seconde = (number - degree - minute / 60) * 3600;
+  seconde = Math.trunc( (seconde*100) + 0.5 )/ 100;
+  resul = resul +" "+degree+"°"+minute+"'"+seconde+'"';
+  return resul;
+}
+
+function DMS2Decimal(pDMS) {
+  var DMS = pDMS.replace(/[°'"]/g," ");
+  var arr = DMS.split(" ");
+  var direction=arr[0];
+  var degree=arr[1];
+  var minute=arr[2];
+  var seconde=arr[3];
+  var resul = parseFloat(degree) + (parseFloat(minute) / 60) + (parseFloat(seconde) / 3600);
+  if (direction != "N" && direction != "E") {
+    resul = resul * -1 ;
+  }
+  return Math.trunc((resul*10000000)+0.5)/10000000;
+}
+
+function distance(lat1,lon1,lat2,lon2) {
+  // Rayon de la terre * formule de la distance entre 2 point sur une sphere (angle en Radian)
+  return Math.trunc(6378137 * Math.acos( Math.sin(toRadians(lat1)) * Math.sin(toRadians(lat2)) + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos((toRadians(lon2)-toRadians(lon1))) ) + 0.5 ) / 1000;
+}
+
+function toRadians(angle) {
+  return angle * (Math.PI / 180);
+}
+
+</script>
+</head>
+<body>
+<form id="TheForm">
+<div align="center">
+<table border="1" width="95%">
+<tr><th bgcolor="#F5766B">Latitude 1</th><th bgcolor="#F5766B">Longitude 1</th><th bgcolor="#AEC850">Latitude 2</th><th bgcolor="#AEC850">Longitude 2</th></tr>
+
+<tr><td><input id="DMSlat1" name="DMSlat1" value="" onchange="javascript:GetAddress('DMS','1')"></td>
+<td><input id="DMSlng1" name="DMSlng1" value=""  onchange="javascript:GetAddress('DMS','1')"></td>
+<td><input id="DMSlat2" name="DMSlat2" value=""  onchange="javascript:GetAddress('DMS','2')"></td>
+<td><input id="DMSlng2" name="DMSlng2" value=""  onchange="javascript:GetAddress('DMS','2')"></td></tr>
+
+<tr><td><input name="latitude1" id="latitude1" value="" onchange="javascript:GetAddress('DEC','1')"></td>
+<td><input name="longitude1" id="longitude1" value="" onchange="javascript:GetAddress('DEC','1')"></td>
+<td><input name="latitude2" id="latitude2" value=""  onchange="javascript:GetAddress('DEC','2')"></td>
+<td><input name="longitude2" id="longitude2" value=""  onchange="javascript:GetAddress('DEC','2')"></td></tr>
+
+<tr><td colspan="2" align="center">
+<input id="FullAddress1" name="" value="" size="50" onchange="GetCoordAddress(this.value,'1')"><div id="ZoneAddMulti1"></div></td>
+<td colspan="2" align="center"><input id="FullAddress2" name="" value="" size="50" onchange="GetCoordAddress(this.value,'2')"><div id="ZoneAddMulti2"></div></td></tr>
+
+<tr><td colspan="4" align="center">Zoom:&nbsp;<input ID="zoom" name="zoom" value="9" size="1" onchange="javascript:ModifyImg();">
+&nbsp;ImgSize:&nbsp;<input id="imgsize" name="imgsize" value="700x700" size="3" onchange="javascript:ModifyImg();">&nbsp;
+<div id="distance"></div>
+<!-- input type="submit" value="Ok"--></td></tr>
+
+<tr><td colspan="2" align="center">
+<a href="tt" id="Map1" target="Map1"><img id="IMG1" src=""></a></td>
+<td colspan="2" align="center">
+<a href="tt" id="Map2" target="Map2"><img id="IMG2" src=""></a></td>
+</tr></table></div>
+<div id="ZoneStatus" align="center"></div>
+
+<script language="javascript">
+ GetAddress('48.6636111,2.2633333','1');
+ GetAddress('48.7913056,2.3888333','2');
+</script>
+
+</body>
+</html>
