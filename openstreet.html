@@ -1,9 +1,11 @@
 <html>
 <head>
+  <meta charset="utf-8"/>
   <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+  <!-- script src="OpenLayers.js"></script -->
   <script language="javascript">
   var http="http://";
-  if (window.location.protocol == "https:") {
+  if (window.location.protocol == "https:" || window.location.protocol == "file:") {
     http="https://";
   }
 
@@ -13,6 +15,7 @@
   var epsg4326 =  new OpenLayers.Projection("EPSG:4326");      //WGS 1984 projection
   var toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
   var map;
+  
   //////////// Control clic
   OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
                 defaultHandlerOptions: {
@@ -40,12 +43,7 @@
                 trigger: function(e) {
                     var lonlat = map.getLonLatFromPixel(e.xy);
                     lonlat = new OpenLayers.LonLat(lonlat.lon,lonlat.lat).transform(toProjection,epsg4326);
-                    if( confirm("Mark " + lonlat.lat + " N, " + lonlat.lon + " E")) {
-                      document.getElementById('lon').value = lonlat.lon;
-                      document.getElementById('lat').value = lonlat.lat;
-		      recenter(lonlat.lon,lonlat.lat);
-                      addmarker(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)
-                    }
+                    MarkAddress(lonlat.lon,lonlat.lat);
                 }
 
   });
@@ -78,19 +76,47 @@
     //}
   }
   function recenter(lon,lat,zoom) {
+    document.getElementById('lon').value = lon;
+    document.getElementById('lat').value = lat;
+    document.getElementById('zoom').value = zoom;
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
     map.setCenter (lonLat, zoom);
   }
-  function addmarker(lon,lat,color) {
+  function addmarker(lon,lat,color,lab) {
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
     var icon = new OpenLayers.Icon('mark_'+color+'.png',size,offset);
     var markers = new OpenLayers.Layer.Markers( "Markers" );
     map.addLayer(markers);
-    popup = new OpenLayers.Popup("toto",lonLat,
-                       new OpenLayers.Size(240,40),
-                       ("Lon: "+ lon +"<br>lat: "+ lat), true);
+     markers.events.register("click", markers, function(e)
+     {
+
+       popup = new OpenLayers.Popup("marker.",lonLat,
+                       new OpenLayers.Size(10,10),
+                       ("Lon: "+ lon +"<br>lat: "+ lat + "<br>"+lab));
+            //OpenLayers.Util.createDiv = function(	id,px,sz,imgURL,position,border,overflow,opacity)
+            popup.closeDiv = OpenLayers.Util.createDiv(popup.id + "_close", null, { w: 17, h: 17 }, null,null,"0px solid black");
+            popup.closeDiv.className = "olPopupCloseBox";
+            //popup.closeDiv.innerHTML=".";
+            
+            // use the content div’s css padding to determine if we should
+            //  padd the close div
+            var contentDivPadding = popup.getContentDivPadding();
+            popup.closeDiv.style.right = contentDivPadding.right + "px";
+            popup.closeDiv.style.top = contentDivPadding.top + "px";
+            popup.groupDiv.appendChild(popup.closeDiv);
+            popup.autoSize = true;
+ 
+            var closePopup = function (e) {
+                this.hide();
+                OpenLayers.Event.stop(e);
+            };
+
+            OpenLayers.Event.observe(popup.closeDiv, "touchend", OpenLayers.Function.bindAsEventListener(closePopup, popup));
+            OpenLayers.Event.observe(popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(closePopup, popup));
+
+            map.addPopup(popup);
+    });
     markers.addMarker(new OpenLayers.Marker(lonLat,icon));
-    map.addPopup(popup);
   }
 
   function GetCommune(cp) {
@@ -99,9 +125,14 @@
     xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
           var myArr = JSON.parse(xmlhttp.responseText);
+          initchoix()
+          var choix = document.getElementById("lab_choix");
           for (var m in myArr) {
-            document.getElementById("lab_commune").innerHTML += myArr[m].nomCommune + " <a href=\"javascript:GetCommuneINSEE('"+myArr[m].codeCommune+"');\">"+myArr[m].codeCommune+"</a>&nbsp;";
+            choix.innerHTML += myArr[m].nomCommune + " <a"
+                                     + " title=\""+myArr[m].codePostal+" "+myArr[m].libelleAcheminement+"\""
+                                     +" href=\"javascript:GetCommuneINSEE('"+myArr[m].codeCommune+"');\">"+myArr[m].codeCommune+"</a>&nbsp;";
           }
+          choix.innerHTML += "<br>";
       }
     };
     xmlhttp.open("GET", url, true);
@@ -114,27 +145,86 @@
     xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
           var myArr = JSON.parse(xmlhttp.responseText);
-          document.getElementById('lon').value = (myArr.features[0].properties.bbox[0] + myArr.features[0].properties.bbox[2])/2;
-          document.getElementById('lat').value = (myArr.features[0].properties.bbox[1] + myArr.features[0].properties.bbox[3])/2;
-          recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value);
+          var lon = (myArr.features[0].properties.bbox[0] + myArr.features[0].properties.bbox[2])/2;
+          var lat = (myArr.features[0].properties.bbox[1] + myArr.features[0].properties.bbox[3])/2;
+          recenter(lon,lat,document.getElementById('zoom').value);
       }
     };
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
   }
-  function resetCommune() {
-    document.getElementById("lab_commune").innerHTML = "";
+  
+  function MarkAddress(lon,lat) {
+    var xmlhttp = new XMLHttpRequest();
+    var url = http+"api-adresse.data.gouv.fr/reverse/?lon="+lon+"&lat="+lat;
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+          var myArr = JSON.parse(xmlhttp.responseText);
+          var addr=" Address not found";
+          if (myArr.features.length > 0) {
+            addr = myArr.features[0].properties.type+": "+myArr.features[0].properties.label;
+          }
+          if( confirm("Mark " + lat + " N, " + lon + " E\n"+addr)) {
+             document.getElementById('lon').value = lon;
+             document.getElementById('lat').value = lat;
+             recenter(lon,lat,document.getElementById('zoom').value);
+             addmarker(lon,lat,document.getElementById('color').value,addr)
+         }
+
+      }
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
   }
+
+
+  function GetAddress(address_text) {
+    var xmlhttp = new XMLHttpRequest();
+    var url = http+"api-adresse.data.gouv.fr//search/?q="+address_text;
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        var myArr = JSON.parse(xmlhttp.responseText);
+        initchoix()
+        var choix = document.getElementById("lab_choix");
+        for (var add in myArr.features) {
+          choix.innerHTML += "<a title=\""+myArr.features[add].properties.type+": "+myArr.features[add].properties.context+"\""
+                                                            + "href=\"javascript:recenter(" + myArr.features[add].geometry.coordinates[0]+","
+                                                            + myArr.features[add].geometry.coordinates[1]+","+document.getElementById('zoom').value+")\">"
+                                                            + myArr.features[add].properties.label+"</a><br>";
+        }
+      }
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+  }
+
+  function initchoix() {
+    document.getElementById("reset").style.display = "block";
+    var choix = document.getElementById("lab_choix");
+    choix.style.border="1px solid black";
+    choix.style.width="50%";
+  }
+
+  function resetchoix() {
+    var choix = document.getElementById("lab_choix");
+    choix.style.border="0px solid black";
+    choix.innerHTML = "";
+  }
+
   </script>
 </head>
 <body>
 <div id="all" align="center">
 <form>
-  CP:&nbsp;<input id="codepostal" name="codepostal" value="91620">
-  <a href="javascript:GetCommune(document.getElementById('codepostal').value)">inseeFROMcp</a>&nbsp;<a href="javascript:resetCommune()">reset</a>
+  Adresse:&nbsp;<input id="address" name="address" value="15 bis chemin du plateau">
+  <a href="javascript:GetAddress(document.getElementById('address').value)">coordFROMaddress</a>
   <br>
-  <div id="lab_commune"></div>
-  <a href="javascript:addmarker(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
+  CP:&nbsp;<input id="codepostal" name="codepostal" value="91620">
+  <a href="javascript:GetCommune(document.getElementById('codepostal').value)">inseeFROMcp</a>
+  <br>
+  <div id="lab_choix"></div>
+  <a href="javascript:resetchoix()" id="reset" style="display:none;margin:0;">reset</a>
+  <a href="javascript:MarkAddress(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
   <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center</a>
   <br>  
   Lon:&nbsp;<input id="lon" name="lon" value="2.26317">
