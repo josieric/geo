@@ -85,7 +85,7 @@
   function addmarker(lon,lat,color,lab) {
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
     var icon = new OpenLayers.Icon('mark_'+color+'.png',size,offset);
-    var markers = new OpenLayers.Layer.Markers( "Markers" );
+    var markers = new OpenLayers.Layer.Markers( lab );
     map.addLayer(markers);
      markers.events.register("click", markers, function(e)
      {
