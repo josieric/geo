@@ -92,28 +92,8 @@
 
        popup = new OpenLayers.Popup("marker.",lonLat,
                        new OpenLayers.Size(10,10),
-                       ("Lon: "+ lon +"<br>lat: "+ lat + "<br>"+lab));
-            //OpenLayers.Util.createDiv = function(	id,px,sz,imgURL,position,border,overflow,opacity)
-            popup.closeDiv = OpenLayers.Util.createDiv(popup.id + "_close", null, { w: 17, h: 17 }, null,null,"0px solid black");
-            popup.closeDiv.className = "olPopupCloseBox";
-            //popup.closeDiv.innerHTML=".";
-            
-            // use the content div’s css padding to determine if we should
-            //  padd the close div
-            var contentDivPadding = popup.getContentDivPadding();
-            popup.closeDiv.style.right = contentDivPadding.right + "px";
-            popup.closeDiv.style.top = contentDivPadding.top + "px";
-            popup.groupDiv.appendChild(popup.closeDiv);
+                       "Lon: "+ lon +"<br>lat: "+ lat + "<br>"+lab, true, );
             popup.autoSize = true;
- 
-            var closePopup = function (e) {
-                this.hide();
-                OpenLayers.Event.stop(e);
-            };
-
-            OpenLayers.Event.observe(popup.closeDiv, "touchend", OpenLayers.Function.bindAsEventListener(closePopup, popup));
-            OpenLayers.Event.observe(popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(closePopup, popup));
-
             map.addPopup(popup);
     });
     markers.addMarker(new OpenLayers.Marker(lonLat,icon));
@@ -215,35 +195,38 @@
 </head>
 <body>
 <div id="all" align="center">
-<form>
-  Adresse:&nbsp;<input id="address" name="address" value="15 bis chemin du plateau">
-  <a href="javascript:GetAddress(document.getElementById('address').value)">coordFROMaddress</a>
-  <br>
-  CP:&nbsp;<input id="codepostal" name="codepostal" value="91620">
-  <a href="javascript:GetCommune(document.getElementById('codepostal').value)">inseeFROMcp</a>
-  <br>
-  <div id="lab_choix"></div>
-  <a href="javascript:resetchoix()" id="reset" style="display:none;margin:0;">reset</a>
-  <a href="javascript:MarkAddress(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
-  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center</a>
-  <br>  
-  Lon:&nbsp;<input id="lon" name="lon" value="2.26317">
-  Lat:&nbsp;<input id="lat" name="lat" value="48.66348">
-  Zoom:&nbsp;<input id="zoom" name="zoom" value="9">
-  Color:&nbsp;
+	<form>
+	  Adresse:&nbsp;<input id="address" name="address" value="bd monge palaiseau">
+	  <a href="javascript:GetAddress(document.getElementById('address').value)">coordFROMaddress</a>
+	  <br>
+	  CP:&nbsp;<input id="codepostal" name="codepostal" value="91400">
+	  <a href="javascript:GetCommune(document.getElementById('codepostal').value)">inseeFROMcp</a>
+	  <br>
+	  <div id="lab_choix"></div>
+	  <a href="javascript:resetchoix()" id="reset" style="display:none;margin:0;">reset</a>
+	  <br>  
+	  Lon:&nbsp;<input id="lon" name="lon" value="2.26317">
+	  Lat:&nbsp;<input id="lat" name="lat" value="48.66348">
+	  Zoom:&nbsp;<input id="zoom" name="zoom" value="9">
+	  Color:&nbsp;
+	  <script>
+		document.open();
+		document.write('<select id="color" name="color">');
+		for (var c in colors) {
+		  document.write('<option value="'+colors[c]+'">'+colors[c]+'</option>');
+		}
+		document.write('</select>');
+		document.close();
+	  </script>
+      <a href="javascript:MarkAddress(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
+      <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center</a>
+
+	</form>
+	<div id="mapdiv" style="width:85%"></div>
+</div>
 <script>
-  document.open();
-  document.write('<select id="color" name="color">');
-  for (var c in colors) {
-     document.write('<option value="'+colors[c]+'">'+colors[c]+'</option>');
-  }
-  document.write('</select>');
-  document.write('<div id="mapdiv" style="width:85%"></div>');
-  document.close();
   get_map(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)
 </script>
-</form>
-</div>
 </body>
 </html>
 
