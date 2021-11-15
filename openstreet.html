@@ -1,7 +1,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+  <script src="https://www.openlayers.org/api/OpenLayers.js"></script>
   <!-- script src="OpenLayers.js"></script -->
   <script language="javascript">
   var http="http://";
@@ -74,11 +74,15 @@
     //  addmarker( Number(lon) + i , Number(lat) + i, colors[c]);
     //  i += 0.1;
     //}
+    return map;
   }
   function recenter(lon,lat,zoom) {
     document.getElementById('lon').value = lon;
     document.getElementById('lat').value = lat;
+    var czoom = map.getZoom();
+    //if (czoom != zoom) { zoom = czoom; }
     document.getElementById('zoom').value = zoom;
+    console.log(map.getZoom());
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
     map.setCenter (lonLat, zoom);
   }
@@ -191,41 +195,91 @@
     choix.innerHTML = "";
   }
 
-  </script>
-</head>
-<body>
-<div id="all" align="center">
-	<form>
-	  Adresse:&nbsp;<input id="address" name="address" value="bd monge palaiseau">
-	  <a href="javascript:GetAddress(document.getElementById('address').value)">coordFROMaddress</a>
-	  <br>
-	  CP:&nbsp;<input id="codepostal" name="codepostal" value="91400">
-	  <a href="javascript:GetCommune(document.getElementById('codepostal').value)">inseeFROMcp</a>
-	  <br>
-	  <div id="lab_choix"></div>
-	  <a href="javascript:resetchoix()" id="reset" style="display:none;margin:0;">reset</a>
-	  <br>  
-	  Lon:&nbsp;<input id="lon" name="lon" value="2.26317">
-	  Lat:&nbsp;<input id="lat" name="lat" value="48.66348">
-	  Zoom:&nbsp;<input id="zoom" name="zoom" value="9">
-	  Color:&nbsp;
-	  <script>
-		document.open();
-		document.write('<select id="color" name="color">');
-		for (var c in colors) {
-		  document.write('<option value="'+colors[c]+'">'+colors[c]+'</option>');
-		}
-		document.write('</select>');
-		document.close();
-	  </script>
-      <a href="javascript:MarkAddress(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
-      <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center</a>
+  function tribute() {
+    var miobj = document.getElementById('tribute');
+    if ( miobj.style.display == "none" ) {
+      miobj.style.display='block';
+    }
+    else {
+      miobj.style.display='none';
+    }
+  }
+  function forms() {
+    var miobj = document.getElementById('forms');
+    var trib = document.getElementById('tribute');
+    if ( miobj.style.display == "none" ) {
+      miobj.style.display='block';
+      trib.style.display='block';
+    }
+    else {
+      miobj.style.display='none';
+      trib.style.display='none';
+    }
+  }
 
-	</form>
-	<div id="mapdiv" style="width:85%"></div>
+  </script>
+  <style>
+   a {  color: #fbd6a4;text-decoration: none;}
+   a:visited {  color: #FFF;}
+   a:hover {  color:#add19e;}
+  </style>
+  <title>Locate in France</title>
+</head>
+<body bgcolor="#837E7C" text="#FFFFFF" align="center">
+<div id="all" align="center" ">
+  <table border="0" style="width: 100%;margin: 0;padding: 0"><tr>
+     <td valign="top" width="10px">
+           <a href="javascript:tribute()" title="Tribute to ...">&#169;</a>
+     </td>
+     <td valign="top" width="19%">
+	   <div id="tribute" align="left">
+	   <ul>
+	     <li><u>Map &amp; Javascript:</u><br>www.openlayers.org</li>
+	     <li><u>Data address &amp; City number:</u><br>apicarto.ign.fr<br>api-adresse.data.gouv.fr</li>
+	   </ul>
+	   </div>
+     </td>
+     <td valign="top" width="10px">
+           <a href="javascript:forms()" id="aforms" title="hide/Show formulaire">&#129488;</a>
+     </td>
+     <td valign="top">
+	   <div id="forms" align="center">
+		<form>
+		  <table border="1">
+		  <tr><td title="Search by address or keyword">Adresse:</td><td><input id="address" name="address" value="bd monge palaiseau"></td>
+		  <td><input type="button" value="coordFROMaddress" onclick="javascript:GetAddress(document.getElementById('address').value)"></td>
+		  </tr><tr>
+		  <td title="Search by postal code">CodePostal:</td><td><input id="codepostal" name="codepostal" value="91400"></td>
+		  <td><input type="button" value="inseeFROMcp" onclick="javascript:GetCommune(document.getElementById('codepostal').value)"></td>
+		  </tr></table>
+		  <div id="lab_choix"></div>
+		  <a href="javascript:resetchoix()" id="reset" style="display:none;margin:0;">reset</a>
+		  <br>  
+		  Lon:&nbsp;<input id="lon" name="lon" value="2.26317" size="8">
+		  Lat:&nbsp;<input id="lat" name="lat" value="48.66348" size="8">
+		  Zoom:&nbsp;<input id="zoom" name="zoom" value="9" size="5">
+		  Color:&nbsp;
+		  <script>
+			// select des colors en vite (mal?) fait !!
+			document.open();
+			document.write('<select id="color" name="color">');
+			for (var c in colors) {
+			  document.write('<option value="'+colors[c]+'">'+colors[c]+'</option>');
+			}
+			document.write('</select>');
+			document.close();
+		  </script>
+		  <a href="javascript:MarkAddress(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
+		  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center</a>
+		</form>
+	   </div>
+     </td>
+     </tr></table>
+     <div id="mapdiv" style="width:99%"></div>
 </div>
+
 <script>
-  get_map(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)
+  var map = get_map(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)
 </script>
 </body>
 </html>
