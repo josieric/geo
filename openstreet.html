@@ -80,9 +80,8 @@
     document.getElementById('lon').value = lon;
     document.getElementById('lat').value = lat;
     var czoom = map.getZoom();
-    //if (czoom != zoom) { zoom = czoom; }
+    if (zoom === undefined) { zoom = czoom; }
     document.getElementById('zoom').value = zoom;
-    console.log(map.getZoom());
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
     map.setCenter (lonLat, zoom);
   }
@@ -131,7 +130,7 @@
           var myArr = JSON.parse(xmlhttp.responseText);
           var lon = (myArr.features[0].properties.bbox[0] + myArr.features[0].properties.bbox[2])/2;
           var lat = (myArr.features[0].properties.bbox[1] + myArr.features[0].properties.bbox[3])/2;
-          recenter(lon,lat,document.getElementById('zoom').value);
+          recenter(lon,lat);
       }
     };
     xmlhttp.open("GET", url, true);
@@ -173,7 +172,7 @@
         for (var add in myArr.features) {
           choix.innerHTML += "<a title=\""+myArr.features[add].properties.type+": "+myArr.features[add].properties.context+"\""
                                                             + "href=\"javascript:recenter(" + myArr.features[add].geometry.coordinates[0]+","
-                                                            + myArr.features[add].geometry.coordinates[1]+","+document.getElementById('zoom').value+")\">"
+                                                            + myArr.features[add].geometry.coordinates[1]+")\">"
                                                             + myArr.features[add].properties.label+"</a><br>";
         }
       }
@@ -270,7 +269,8 @@
 			document.close();
 		  </script>
 		  <a href="javascript:MarkAddress(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
-		  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center</a>
+		  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value)">center</a>
+		  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center&amp;forceZoom</a>
 		</form>
 	   </div>
      </td>
