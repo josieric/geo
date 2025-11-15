@@ -217,25 +217,31 @@ var colors = {
     choix.innerHTML = "";
   }
 
-  function tribute() {
-    var miobj = document.getElementById('tribute');
-    if ( miobj.style.display == "none" ) {
-      miobj.style.display='block';
-    }
-    else {
-      miobj.style.display='none';
+
+  function display(lab, forceState) {
+    var miobj = document.getElementById(lab);
+    if (forceState === 'block' || forceState === 'none') {
+        miobj.style.display = forceState;
+    } else {
+        if (miobj.style.display == "none") {
+            miobj.style.display = 'block';
+        } else {
+            miobj.style.display = 'none';
+        }
     }
   }
+
   function forms() {
     var miobj = document.getElementById('forms');
-    var trib = document.getElementById('tribute');
     if ( miobj.style.display == "none" ) {
       miobj.style.display='block';
-      trib.style.display='block';
+      display('tribute','block');
+      display('saveload','block');
     }
     else {
       miobj.style.display='none';
-      trib.style.display='none';
+      display('tribute','none');
+      display('saveload','none');
     }
   }
 
@@ -330,7 +336,7 @@ input[type=file]::file-selector-button:hover {
 <div id="all" align="center" ">
   <table border="0" style="width: 100%;margin: 0;padding: 0"><tr>
      <td valign="top" width="10px">
-           <a href="javascript:tribute()" title="Tribute to ...">&#169;</a>
+           <a href="javascript:display('tribute')" title="Tribute to ...">&#169;</a>
      </td>
      <td valign="top" width="19%">
 	   <div id="tribute" align="left">
@@ -375,6 +381,9 @@ input[type=file]::file-selector-button:hover {
 		  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center&amp;forceZoom</a>
 		</form>
 	   </div>
+     </td>
+     <td valign="top" width="10px">
+	   <a href="javascript:display('saveload')" title="Tribute to ...">&#128190;</a>
      </td>
      <td valign="top" width="19%">
            <div id="saveload" align="left">
