@@ -85,21 +85,42 @@
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
     map.setCenter (lonLat, zoom);
   }
+
+  // 1 layer pour chaque markers
   function addmarker(lon,lat,color,lab) {
+    lab = color+"\t"+lab;
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
     var icon = new OpenLayers.Icon('mark_'+color+'.png',size,offset);
     var markers = new OpenLayers.Layer.Markers( lab );
     map.addLayer(markers);
      markers.events.register("click", markers, function(e)
      {
-
        popup = new OpenLayers.Popup("marker.",lonLat,
                        new OpenLayers.Size(10,10),
-                       "Lon: "+ lon +"<br>lat: "+ lat + "<br>"+lab, true, );
+	       "<font style=\"color: 000000;\">Lon: "+ lon +"<br>lat: "+ lat + "<br>"+lab+"</font>", true, );
             popup.autoSize = true;
+	    popup.opacity = 0.65;
             map.addPopup(popup);
     });
     markers.addMarker(new OpenLayers.Marker(lonLat,icon));
+  }
+
+  function saveMarkers() {
+    var allmarkers = [];
+    for (var i = 0; i < map.layers.length; i++) {
+	// console.log(map.layers[i]);
+	if (map.layers[i].hasOwnProperty('markers')) {
+            console.log("Attribut markers existe.");
+	    map.layers[i].markers.forEach(function(marker, index) {
+	        // Obtenir la position du marqueur
+	        console.log(map.layers[i].name +" Marqueur " + index + " : Lon:", marker.lonlat.lon, "Lat:", marker.lonlat.lat);
+		lonlat = new OpenLayers.LonLat(marker.lonlat.lon,marker.lonlat.lat).transform(toProjection,epsg4326);
+		allmarkers.push(map.layers[i].name +"\t"+lonlat.lon+"\t"+lonlat.lat);
+                  });
+	}
+   	console.log("Fin");
+    }
+    saveFile(allmarkers.join('\n'),"markers.csv","text/plain");
   }
 
   function GetCommune(cp) {
@@ -125,12 +146,13 @@
   function GetCommuneINSEE(insee) {
     var xmlhttp = new XMLHttpRequest();
     var url = http+"apicarto.ign.fr/api/gpu/municipality/?insee="+insee;
+    
     xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
           var myArr = JSON.parse(xmlhttp.responseText);
-          var lon = (myArr.features[0].properties.bbox[0] + myArr.features[0].properties.bbox[2])/2;
-          var lat = (myArr.features[0].properties.bbox[1] + myArr.features[0].properties.bbox[3])/2;
-          recenter(lon,lat);
+          var lon = (myArr.features[0].bbox[0] + myArr.features[0].bbox[2])/2;
+          var lat = (myArr.features[0].bbox[1] + myArr.features[0].bbox[3])/2;
+          recenter(lon,lat,document.getElementById('zoom').value);
       }
     };
     xmlhttp.open("GET", url, true);
@@ -216,11 +238,90 @@
     }
   }
 
+// push file to client
+function saveFile(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+}
+
+// get file from client
+function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+    for (var i = 0, f; f = files[i]; i++) {
+      var reader = new FileReader();
+      reader.fname = f.name;
+      console.log('fname='+f.name)
+      reader.onloadend = function(evt) {
+        if (evt.target.readyState == reader.DONE) { // DONE == 2
+	  var content = evt.target.result.split('\n');
+	  content.forEach(function(ligne,indice) {
+	      var [color, lab, lon, lat] = ligne.split('\t');
+              console.log(indice+" "+color + " "+lab + " "+lon+" "+lat);
+              addmarker(lon,lat,color,lab);
+	  });
+        }
+      };
+      reader.readAsText(f);
+      console.log("Loaded")
+      //reader.readAsArrayBuffer(f);
+      //reader.readAsDataURL(f);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('file').addEventListener('change', handleFileSelect, false);
+}, false);
+
   </script>
   <style>
    a {  color: #fbd6a4;text-decoration: none;}
    a:visited {  color: #FFF;}
    a:hover {  color:#add19e;}
+
+input[type=button],button {
+  color: #fff;
+  padding: 8px 8px;
+  background-color: #222245;
+  border: 1px solid #bd6a4;
+}
+
+input[type=button]:hover,button:hover {
+  background: #4747b8;
+}
+
+input[type=file] {
+  color: #222245;
+  padding: 8px;
+  background-color: #837E7C;
+  border: 0px
+}
+
+input[type=file]:focus {
+  outline: 2px dashed #222245;
+  outline-offset: 2px;
+}
+
+input[type=file]::file-selector-button {
+  margin-right: 8px;
+  border: none;
+  background: #222245;
+  padding: 8px 12px;
+  color: #fff;
+  cursor: pointer;
+}
+
+input[type=file]::file-selector-button:hover {
+  background: #4747b8;
+}
   </style>
   <title>Locate in France</title>
 </head>
@@ -273,6 +374,14 @@
 		  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center&amp;forceZoom</a>
 		</form>
 	   </div>
+     </td>
+     <td valign="top" width="19%">
+           <div id="saveload" align="left">
+           <ul>
+	     <li><button onclick="javascript:saveMarkers()">Enregistrer les positions</button></li>
+	     <li><form><input type="file" id="file" name="file" /></form></li>
+           </ul>
+           </div>
      </td>
      </tr></table>
      <div id="mapdiv" style="width:99%"></div>

@@ -1,0 +1,80 @@
+<html>
+<head>
+<title>Explore UTF-8 char in HTML</title>
+<meta charset="UTF-8"> 
+<script>
+function getChar(min,max,size) {
+  var HTML= "";
+  var mmin=parseInt(min);
+  var mmax=parseInt(max);
+  var obj = document.getElementById('min');
+  if (obj.value != min) {
+       obj.value=min;
+       convert_number(obj);
+  }
+  obj = document.getElementById('max');
+  if (obj.value != max) {
+       obj.value=max;
+       convert_number(obj);
+  }
+  if (size == null) { size=document.getElementById('size').value; }
+  for (var c=mmin; c<=mmax ;c++) {
+     HTML += ('<span style="font-size: '+size+'px" title="'+c+' 0x'+ c.toString(16).toUpperCase() +'">&#'+c+';</span> ');
+  }
+  document.getElementById('lab').innerHTML = HTML+"<br>Done";
+}
+function convert_number(changed) {
+  if (changed.id == "min") {
+    document.getElementById('minhex').value = "0x"+parseInt(changed.value).toString(16).toUpperCase();
+  }
+  else if (changed.id == "max") {
+    document.getElementById('maxhex').value = "0x"+parseInt(changed.value).toString(16).toUpperCase();
+  }
+  else if (changed.id == "minhex") {
+    document.getElementById('min').value = parseInt(changed.value,16).toString();
+  }
+  else if (changed.id == "maxhex") {
+    document.getElementById('max').value = parseInt(changed.value,16).toString();
+  }
+
+}
+</script>
+</head>
+<body>
+&#x1F1F5;&#x1F1F8;
+
+&nbsp;
+&#x1F1EB;&#x1F1F7;
+<form><span style="color:red" title="Signed by EJO !!">&#9773;</span>
+  <input name="min" id="min" value="9776" title="Min in decimal" onchange="javascript:convert_number(this)">
+  <input name="max" id="max" value="12953" title="Max in decimal (NB 0xFFFFFFFF == 4294967295)"  onchange="javascript:convert_number(this)"><br>
+  <span style="color:black" title="Signed by EJO !!">&#9774;</span>
+  <input name="minhex" id="minhex" value="0x2630" title="Min in hexa" onchange="javascript:convert_number(this)">
+  <input name="maxhex" id="maxhex" value="0x3299" title="Max in hexa (NB 0xFFFFFFFF)" onchange="javascript:convert_number(this)">
+  <input name="size" id="size" value="30" title="Size in px">
+  <input type="button" onclick="javascript:getChar(document.getElementById('min').value,
+                                                   document.getElementById('max').value,
+                                                   document.getElementById('size').value )" value="Go">
+  <br>Try:	
+  <a href="javascript:getChar(8352,8383)" title="Currency Symbols">8352&#8680;8383</a>
+  <a href="javascript:getChar(8448,8585)" title="Letterlike Symbols">8448&#8649;8585</a>
+  <a href="javascript:getChar(8592,8703)" title="Arrows">8592&#8658;8703</a>
+  <a href="javascript:getChar(8704,8959)" title="Mathematical Operators">8704&#8674;8959</a>
+  <a href="javascript:getChar(8960,9471)" title="Symbols">8960&#8694;9471</a>
+  <a href="javascript:getChar(9472,9599)" title="Box Drawings">9472&#8694;9599</a>
+  <a href="javascript:getChar(9600,9631)" title="Block Elements">9600&#8702;9631</a>
+  <a href="javascript:getChar(9632,9727)" title="Geometric Shapes">9632&#8688;9727</a>
+  <a href="javascript:getChar(9728,10175)" title="Miscellaneous Dingbats ...">9728&#8694;10175</a>
+  <br>Or :
+  <a href="javascript:getChar(8986,12953)" title="">8986&#8614;12953</a>
+  <a href="javascript:getChar(61375,61439)" title="">61375&#8608;61439</a>
+  <a href="javascript:getChar(118784,119261)" title="">118784&#8614;119261</a>
+  <a href="javascript:getChar(119808,120831)" title="">119808&#8608;120831</a>
+  <a href="javascript:getChar(126976,129685)" title="Emoji">126976&#8702;129685</a>
+</form>
+
+
+<div id="lab"></div>
+
+</body>
+</html>
