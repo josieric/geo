@@ -3,12 +3,12 @@
   <meta charset="utf-8"/>
   <script src="https://www.openlayers.org/api/OpenLayers.js"></script>
   <!-- script src="OpenLayers.js"></script -->
+  <!-- link href="https://openlayers.org/api/theme/default/style.css" rel="stylesheet" / -->
   <script language="javascript">
   var http="http://";
   if (window.location.protocol == "https:" || window.location.protocol == "file:") {
     http="https://";
   }
-
 var colors = {
 "blue": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAlCAYAAACpmHIGAAAACXBIWXMAAAj2AAAI5QBAXMRAAAAE7klEQVR4nK2We0xTdxTHL20pbS2P3nvZTJb9MWcm41Vs0ZZnQatCFRDBjSGLmxM3Y9yWLIRsC8zsYZhWEBYeAxNEHgMjjqlz8tQOKMJ4bW5zG1umW0CURwvIZAic/X63FsHe0jr945um7Tmfe36/3/ec3yUAgGDTuMEoKCs8FrNj+wvHVocEdrr5PX+TK101Tcu8B9aogi/vTEjIqyouiZwcn3C0xmD9Mf9IVtJKqfdPvEQNCMozwKW3Gqj+i0ANtQL5dxM4d50EQfFH4Lh9A3jIpN8XZeck2ISPGQyCmE0R5ZyYMHBFAGqyC8jxDiBH9EAOtQB5Cwk/AH8f/47536W9EjhbQiEmIrLMODoqZIWPjRoEAf7+Dbz014G63Qmk4TKQN5ttC8XheMe0PaCUyZoMI/cfMA/fGqEpxwH0nR5ThfaAzULxOA/noxVULILnaTNf5kSrTBU/LHjBA6iJTuBEh8HnWdlJDNw4PCJ8xterDx8aOWrnVlgTynfpPgUr/Lz7jCOjAqIkryCeuzMKqH+6rSeNtKFVdTErw5/kaJvVWMzBvJL8gngiIS6+RFClBXKsgz0B/e7+Qw1I0veCc1IUuKXuBrqjCqhx6/FCxHsxLu4E4asK6nG+UgPksJ41kD5fAAJagjaQmBdfJIQnSjMYO1rkIA7m+YQE9hKuvh7D1MAlk48XBbWC+7V6EK54ehHYLCfSFegfz5g8vzAPcTAPcwmen8cMjUAWLsFNUnkEHFjAZkly3gMSO+xBWyIe4t4l3OU+N3BLM523MAjZyjU/3SoYyy1tr6mLF1XeCpK/GuFJf99+QhmuahV3VDKOWBRkbAe6tgg4S8DJ8kOW+4444vYvICBc1ULs3538KT87lX15aD+dN4eygsVrfYC+obNcMeLwj6YC5hK62jq5U/jaWQpVarHvqAr6j1pwiVkHXAcHBsrF4HUKxp4W8wd3KeoBocr/bktDk4xpf3V4+FkR9jqbtVD1NEqgm0tBgg6YbipmDoy1m1H+sopDoFmvrpmfLd/W1cuFgX7TFJtr7lXEVIkfzrZCc9UoxilUPtN47rxy0VRMjN1W5JSZYnn69grttaDwA4iOiKi0GLl9P199ivZ6bkjy69eWjWFLuLv/rANXn1VjV7q6n2W9ibQHPnyDmxgJ9IPOsSG8Wu6urXAgJfUdq9fc3MwsEaRUNooqD6MmYjlcNqFzEH/1GcjlMv301NTSF3RHc4uns9TjNom6DM+XJcHY4wM6EMm97uhq6+V23f7vvvn2+7x9CTYPl5rsBseUV+Ct15I/sfvVYnJigucl9e11vlRssh4bHNnOpa0CVnp7/mJAt5ndcKzTZRUb+WrlHGvn4qrRXjtGqaC0oDD2oV6KzNKo1dWiEwctOxfdQqJTWRAWHHxhqfwl4fqmi1JRgPRf5k3LXP29+SEIWzPTcPac8n/DsWI1m8uFxz++Xz2uuuowaNQbTtvKtQnXXajzF6xXzOC5wVSN7lV+ZPDcN9VfhjwyHCs0NKRBXFcIJLKmWHccFIEBLTA7azPPLnhh5tEdvD1xQMNV4O1/CXIOZuyyJ88ueP+169RyxepbEjSc6CB/w/Xffl/+2OBY0dtiT3LSkmFT9JYz9ubYDc/NzX2V4DuAVqvd99jhPT09nugOndLr9RYD6pHhRqNxmUKhaBwcHKTszfkPHreRa/502A4AAAAASUVORK5CYII=",
 "green": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAlCAYAAACpmHIGAAAACXBIWXMAAAj2AAAI5QBAXMRAAAAEzUlEQVR4nK2WbUxbZRTH7/pGe+nrvZfBQuKgQ+dA2kILbSktYyODMWjFQUYYZtEZY5zTD2ZZjIHsiyZLcHOLgGNLEEYnmG1R58uGgEMYChHBTY1KzFADY7y15cVNxjg+T2sXaG/p3cuH/4fe3vN7zvOc/znPJQCAYNOMa0bcVNfo2F1SeirFqv1eqaNv8rXkApO6djQtS//dntLympb6D7fPz8wLQzFYH9a+U12eoFX/LChTgNgZD/JBHVAjZqAnMoH62wSyfg2I69eDsEQOT6Zu/PHksROlYeEel0fsyC1w8hwkKPq1QM/bgJqxAjWFoBMWoMaR8AL4N3qO/5f3aoBXQIIjr7DJPe2WsMI90x6x2ZDWJqiMAnoOAV1INy3hhd6j52wgrIgCU6qhwzXlkgTBn84rdOIXmFtZvgy5gP1C7+M4HO/IKzizAl5T9d6zPDvpy/h+wcsWoGetwLNHwomjteVeuHvSJYnXxA15izad+WBgv6atIP9BB2pd/JB7yi0mGmrqi/l7FED/YwsdhAqIz9Wv1ZLAHMxrqK0vJkp3ljSIW9RAeUIUED2PupoGqso4kJVHg/LgemD69D4XhXhfgni7dhY3Epos7YDsWgpQkyzZoBeZL5CnGSE6QOKeRCQf1p7exL4A4mBesjV5kFBolJP0aIbPxwEvRQ2bQaKWrAD7FUEJgPkp3ef55XGIg3mYSwh05CKDsw50CW6S5iRYwwL2S3X8caDmAmqFbYl4iHuHiNJH38AtHZQ5ClLUbgwJxlJWxPm6eEXmmaD6ywjRhnUjhCnbeEXalxy8PTc670ta4K0Cp5yJweeOnCTtTQZztqmb2P/Cy4dFx2LZt4cWlO2gWcHSdDkwN/6fNQE7Fr0bC5hLdF66rI/Ilt2l3SznjuDMHyaQOxjgr/FB+Ri8ReW1Z9D8wV06bQFJlvxOd1tXqrf9c7K3XCBbNrBbCy+Atsp0pYAKFZjp0HkLxtpIKD7yjBryt277+N5s+aa1Uy/JkC3Qkxb22TLum37exd0h5g/O2pUJETbpYvtnX5lWTMWyol0nI47EBlefq9BZi+seA3vejuagkTv0y1Ask8RMqH4zBDsnnPAxXU8HRbLSc63/6gbWm6jq0OGX+GXIBYHOCSO8W/5eBRw6UPl6yGtuaXGJsJhM7WQzKu4sxwVmbBD5yROg16f0LNxeWP2C7uvqTZRp5XMU6jLWYRbQjdSoGUi99Ba2NKfb/41XD74p2KcKW1z8v/AAA6/tfeUtzp8W87PzgiTtpkHZ5SSf9djgyJrybzWQ8JT6V9ekS8IZjnW+6ew2UY50ibVzcdbI88JCKZx+v6Hovj6K/MrPyT1HNsZ7ixbYieTZBNicab24Wvyq8J6OK1rSLPuX9n8QLZsf4s2yxbYLraYHhmMV5dudkg+WZY+zRnMI7ep8uNiw8M6LXxvEW+WLeG54s0b3qmi7bOnLc59bHxqOZbNZ2iJb0YWMrCftTAJjRlo33A0fxwled6R2t+BFFTCQDYL9FBx/++jzXOI4wUeGR+gY47px5XUDMJYY15+/D8c8MjiW/Rn7R7wKFeTacz/lGsMZXl1d/RwhIqCqqmrfI4cPDAwmojv0dk9PT9CAemi42+2ONBqN7WNjYzTXmP8AoGDE27o4i4UAAAAASUVORK5CYII=",
@@ -45,7 +45,6 @@ var colors = {
                         }, this.handlerOptions
                     );
                 }, 
-
                 trigger: function(e) {
                     var lonlat = map.getLonLatFromPixel(e.xy);
                     lonlat = new OpenLayers.LonLat(lonlat.lon,lonlat.lat).transform(toProjection,epsg4326);
@@ -65,11 +64,39 @@ var colors = {
     click.activate();
 
     // create layer principal
-    map.addLayer(new OpenLayers.Layer.OSM());
+    map.addLayer(new OpenLayers.Layer.OSM(
+	    "OpenStreetMap", [
+                            "https://a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+                            "https://b.tile.openstreetmap.org/${z}/${x}/${y}.png",
+                            "https://c.tile.openstreetmap.org/${z}/${x}/${y}.png"
+                        ]
+    ));
+    // 	https://openmaptiles.data.gouv.fr/data/planet-vector/${z}/${x}/${y}.pbf
+    //  https://openmaptiles.geo.data.gouv.fr/
+    // map.addLayer(new OpenLayers.Layer.VectorTileLayer({
+    //            source: new VectorTileSource({
+    //                        format: new MVT(),
+    //                        url: 'https://data.geopf.fr/tms/1.0.0/PLAN.IGN/{z}/{x}/{y}.pbf'
+    //                      })
+    //      /*,      style: /* définir votre style ici */ });
+
+    // try satelite
+    map.addLayer(new OpenLayers.Layer.XYZ(
+                "Satellite", [
+                    "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}"
+                ], {
+                    attribution: "Powered by Esri. " + 
+                        "Source: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community",
+                    numZoomLevels: 24,
+                    sphericalMercator: true
+                }));
 
     // create layer switcher widget in top right corner of map.
     var layer_switcher= new OpenLayers.Control.LayerSwitcher({});
     map.addControl(layer_switcher);
+
+    // Écoutez l’événement de déplacement ou de zoom terminé pour mettre à jour les inputs
+    map.events.register("moveend", map, function() { updateLonLatInputs(); });
 
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
     map.setCenter (lonLat, zoom);
@@ -79,10 +106,10 @@ var colors = {
   function recenter(lon,lat,zoom) {
     document.getElementById('lon').value = lon;
     document.getElementById('lat').value = lat;
-    var czoom = map.getZoom();
-    if (zoom === undefined) { zoom = czoom; }
-    document.getElementById('zoom').value = zoom;
     var lonLat = new OpenLayers.LonLat( Number(lon) , Number(lat) ).transform(epsg4326,toProjection);
+    if (zoom === undefined) {
+       zoom = document.getElementById('zoom').value;
+    }
     map.setCenter (lonLat, zoom);
   }
 
@@ -124,6 +151,7 @@ var colors = {
     saveFile(allmarkers.join('\n'),"markers.csv","text/plain");
   }
 
+  // get info Commune from apicarto
   function GetCommune(cp) {
     var xmlhttp = new XMLHttpRequest();
     var url = http+"apicarto.ign.fr/api/codes-postaux/communes/"+cp;
@@ -183,10 +211,10 @@ var colors = {
     xmlhttp.send();
   }
 
-
+  // get infos adresse from api-adresse.data.gouv.fr
   function GetAddress(address_text) {
     var xmlhttp = new XMLHttpRequest();
-    var url = http+"api-adresse.data.gouv.fr//search/?q="+address_text;
+    var url = http+"api-adresse.data.gouv.fr/search/?q="+address_text;
     xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
         var myArr = JSON.parse(xmlhttp.responseText);
@@ -204,6 +232,7 @@ var colors = {
     xmlhttp.send();
   }
 
+  // Gestion du div de sortie des recherches Commune et Adresse
   function initchoix() {
     document.getElementById("reset").style.display = "block";
     var choix = document.getElementById("lab_choix");
@@ -217,7 +246,17 @@ var colors = {
     choix.innerHTML = "";
   }
 
+  // Fonction pour mettre à jour les inputs lon lat zoom from la map/carte
+  function updateLonLatInputs() {
+    var center = map.getCenter();
+    lonlat = new OpenLayers.LonLat(center.lon,center.lat).transform(toProjection,epsg4326);
+    document.getElementById('lon').value = lonlat.lon;
+    document.getElementById('lat').value = lonlat.lat;
+    var zoom = map.getZoom();
+    document.getElementById('zoom').value = zoom;
+  }
 
+  // Hide show (display block/none)
   function display(lab, forceState) {
     var miobj = document.getElementById(lab);
     if (forceState === 'block' || forceState === 'none') {
@@ -245,23 +284,23 @@ var colors = {
     }
   }
 
-// push file to client
-function saveFile(content, filename, mimeType) {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
+  // push file to client
+  function saveFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-  URL.revokeObjectURL(url);
-}
+    URL.revokeObjectURL(url);
+  }
 
-// get file from client
-function handleFileSelect(evt) {
+  // get file from client
+  function handleFileSelect(evt) {
     var files = evt.target.files; // FileList object
     for (var i = 0, f; f = files[i]; i++) {
       var reader = new FileReader();
@@ -282,10 +321,42 @@ function handleFileSelect(evt) {
       //reader.readAsArrayBuffer(f);
       //reader.readAsDataURL(f);
     }
-}
+  }
 
+// When doc is loaded add listener
 document.addEventListener('DOMContentLoaded', function() {
+  // Ecoute event pour choix fichier (load info markers)
   document.getElementById('file').addEventListener('change', handleFileSelect, false);
+
+  // Ecoute event pour mettre à jour map avec inofs des inputs lon lat zoom
+  document.getElementById('zoom').addEventListener('change', function() {
+    var newZoom = parseInt(this.value);
+    if (!isNaN(newZoom)) {
+        map.zoomTo(newZoom);
+    }
+  });
+
+  document.getElementById('lon').addEventListener('change', function() {
+    var lon = parseFloat(this.value);
+    var lat = parseFloat(document.getElementById('lat').value);
+    if (!isNaN(lon) && !isNaN(lat)) {
+        var newCenter = new OpenLayers.LonLat(lon, lat).transform(epsg4326, toProjection);
+        map.setCenter(newCenter);
+    }
+  });
+
+  document.getElementById('lat').addEventListener('change', function() {
+    var lat = parseFloat(this.value);
+    var lon = parseFloat(document.getElementById('lon').value);
+    if (!isNaN(lat) && !isNaN(lon)) {
+        var newCenter = new OpenLayers.LonLat(lon, lat).transform(epsg4326, toProjection);
+        map.setCenter(newCenter);
+    }
+  });
+
+  // Load map 
+  map = get_map(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value);
+
 }, false);
 
   </script>
@@ -333,16 +404,17 @@ input[type=file]::file-selector-button:hover {
   <title>Locate in France</title>
 </head>
 <body bgcolor="#837E7C" text="#FFFFFF" align="center">
-<div id="all" align="center" ">
+<div id="all" align="center">
   <table border="0" style="width: 100%;margin: 0;padding: 0"><tr>
      <td valign="top" width="10px">
            <a href="javascript:display('tribute')" title="Tribute to ...">&#169;</a>
      </td>
      <td valign="top" width="19%">
-	   <div id="tribute" align="left">
+	   <div id="tribute" align="left" style="font-size:12;">
 	   <ul>
 	     <li><u>Map &amp; Javascript:</u><br>www.openlayers.org</li>
 	     <li><u>Data address &amp; City number:</u><br>apicarto.ign.fr<br>api-adresse.data.gouv.fr</li>
+	     <li><u>Tile street &amp; satelite</u><br>openstreetmap.org<br>services.arcgisonline.com</li>
 	   </ul>
 	   </div>
      </td>
@@ -376,14 +448,12 @@ input[type=file]::file-selector-button:hover {
 			document.write('</select>');
 			document.close();
 		  </script>
-		  <a href="javascript:MarkAddress(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">mark</a>
-		  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value)">center</a>
-		  <a href="javascript:recenter(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)">center&amp;forceZoom</a>
+		  <a href="javascript:MarkAddress(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('color').value)">Marquer</a>
 		</form>
 	   </div>
      </td>
      <td valign="top" width="10px">
-	   <a href="javascript:display('saveload')" title="Tribute to ...">&#128190;</a>
+	   <a href="javascript:display('saveload')" title="Save/Load markers">&#128190;</a>
      </td>
      <td valign="top" width="19%">
            <div id="saveload" align="left">
@@ -396,10 +466,6 @@ input[type=file]::file-selector-button:hover {
      </tr></table>
      <div id="mapdiv" style="width:99%"></div>
 </div>
-
-<script>
-  var map = get_map(document.getElementById('lon').value,document.getElementById('lat').value,document.getElementById('zoom').value)
-</script>
 </body>
 </html>
 
